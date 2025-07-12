@@ -65,6 +65,8 @@ class AIDocumentationViewProvider {
           return;
         }
         await this._generateDocumentation(message.files, message.task);
+      } else if (message.command === 'saveApiKey') {
+        await this._saveApiKey(message.value);
       }
     });
   }
@@ -85,6 +87,7 @@ class AIDocumentationViewProvider {
   }
 
   _getHtmlContent() {
+    const apiKey = this._getApiKey() || '';
     return `
       <!DOCTYPE html>
       <html>
@@ -163,9 +166,60 @@ class AIDocumentationViewProvider {
             .loading .spinner {
               display: block;
             }
+            .config-section {
+              margin: 10px 0;
+              padding: 10px;
+              border: 1px solid var(--vscode-panel-border);
+              border-radius: 4px;
+            }
+            .config-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              cursor: pointer;
+              user-select: none;
+            }
+            .config-content {
+              display: none;
+              margin-top: 10px;
+              padding: 0;
+            }
+            .config-content.visible {
+              display: block;
+            }
+            .config-content input,
+            .config-content button {
+              width: 100%;
+              margin: 5px 0;
+            }
+            input[type="text"], input[type="password"] {
+              width: 100%;
+              padding: 8px;
+              margin: 5px 0;
+              background: var(--vscode-input-background);
+              color: var(--vscode-input-foreground);
+              border: 1px solid var(--vscode-input-border);
+              border-radius: 2px;
+              box-sizing: border-box;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              display: block;
+            }
           </style>
         </head>
         <body>
+          <div class="config-section">
+            <div class="config-header" id="configHeader">
+              <span>⚙️ Configuration</span>
+              <span class="toggle-icon">▼</span>
+            </div>
+            <div class="config-content" id="configContent">
+              <div class="info-text">Enter your Gemini API key:</div>
+              <input type="password" id="apiKeyInput" value="${apiKey}" placeholder="Enter your Gemini API key here"/>
+              <button id="saveApiKey">Save API Key</button>
+            </div>
+          </div>
+
           <div class="info-text">Select the type of documentation to generate:</div>
           <select id="taskSelect">
             <option value="">Select a documentation type...</option>
@@ -173,7 +227,7 @@ class AIDocumentationViewProvider {
               `<option value="${key}">${prompt.name}</option>`
             ).join('\n')}
           </select>
-          <div class="info-text">Select one or more test files to generate documentation:</div>
+          <div class="info-text">Select one or more files to generate documentation:</div>
           <div id="fileList" class="file-list"></div>
           <div class="spinner" id="loadingSpinner"></div>
           <button id="generateBtn" disabled>Generate Documentation</button>
@@ -183,7 +237,31 @@ class AIDocumentationViewProvider {
             const generateBtn = document.getElementById('generateBtn');
             const loadingSpinner = document.getElementById('loadingSpinner');
             const taskSelect = document.getElementById('taskSelect');
+            const configHeader = document.getElementById('configHeader');
+            const configContent = document.getElementById('configContent');
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            const saveApiKeyBtn = document.getElementById('saveApiKey');
             
+            // Configuration section toggle
+            configHeader.addEventListener('click', () => {
+              configContent.classList.toggle('visible');
+              const isVisible = configContent.classList.contains('visible');
+              configHeader.querySelector('.toggle-icon').textContent = isVisible ? '▲' : '▼';
+            });
+
+            // Save API key
+            saveApiKeyBtn.addEventListener('click', () => {
+              const apiKey = apiKeyInput.value.trim();
+              if (!apiKey) {
+                vscode.window.showErrorMessage('API key cannot be empty');
+                return;
+              }
+              vscode.postMessage({
+                command: 'saveApiKey',
+                value: apiKey
+              });
+            });
+
             // Set initial task selection from state
             taskSelect.value = state.selectedTask;
             
@@ -226,6 +304,8 @@ class AIDocumentationViewProvider {
             });
 
             // Handle file list updates from extension
+
+            // Handle file list updates from extension
             window.addEventListener('message', event => {
               const message = event.data;
               if (message.type === 'updateFiles') {
@@ -243,6 +323,8 @@ class AIDocumentationViewProvider {
                 setLoading(false);
               } else if (message.type === 'generationComplete' || message.type === 'generationError') {
                 setLoading(false);
+              } else if (message.type === 'apiKeySaved') {
+                vscode.window.showInformationMessage('Gemini API key saved successfully');
               }
             });
           </script>
@@ -265,10 +347,12 @@ class AIDocumentationViewProvider {
     vscode.window.showInformationMessage('Generating documentation with Gemini...');
 
     try {
-      if (!process.env.GEMINI_API_KEY) {
-        console.log('Error: GEMINI_API_KEY not found in environment variables');
+      const apiKey = this._getApiKey();
+      if (!apiKey) {
+        console.log('Error: Gemini API key not found in configuration');
         this._view.webview.postMessage({ type: 'generationError' });
-        throw new Error('GEMINI_API_KEY environment variable is not set');
+        vscode.window.showErrorMessage('Please configure your Gemini API key in the Configuration section');
+        return;
       }
 
       // Read all selected files
@@ -341,6 +425,21 @@ class AIDocumentationViewProvider {
       console.error('Gemini API error:', error);
       vscode.window.showErrorMessage(`Failed to generate docs: ${error.message}`);
     }
+  }
+
+  async _saveApiKey(apiKey) {
+    try {
+      await vscode.workspace.getConfiguration('aiDocGenerator').update('geminiApiKey', apiKey, true);
+      this._view.webview.postMessage({ type: 'apiKeySaved' });
+      vscode.window.showInformationMessage('Gemini API key saved successfully');
+    } catch (error) {
+      console.error('Failed to save API key:', error);
+      vscode.window.showErrorMessage('Failed to save Gemini API key');
+    }
+  }
+
+  _getApiKey() {
+    return vscode.workspace.getConfiguration('aiDocGenerator').get('geminiApiKey');
   }
 }
 

@@ -16,7 +16,7 @@
       "activitybar": [
         {
           "id": "ai-documentation",
-          "title": "AI Documentation Generator",
+          "title": "AI-Powered Doc Generator",
           "icon": "./media/icon.svg"
         }
       ]
@@ -25,7 +25,7 @@
       "ai-documentation": [
         {
           "id": "aiDocGenerator",
-          "name": "Document Generator",
+          "name": "",
           "type": "webview"
         }
       ]
@@ -35,7 +35,17 @@
         "command": "ai-doc-gemini.generateDocs",
         "title": "Generate AI Documentation"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "AI Documentation Generator",
+      "properties": {
+        "aiDocGenerator.geminiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Gemini API key for generating documentation"
+        }
+      }
+    }
   },
   "scripts": {
     "lint": "eslint .",
