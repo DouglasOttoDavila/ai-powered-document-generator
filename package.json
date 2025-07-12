@@ -12,6 +12,24 @@
   ],
   "main": "./extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "playwright-documentation",
+          "title": "Playwright Documentation Generator",
+          "icon": "./media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "playwright-documentation": [
+        {
+          "id": "playwrightDocGenerator",
+          "name": "Document Generator",
+          "type": "webview"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "playwright-doc-gemini.generateDocs",

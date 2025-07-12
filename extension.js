@@ -12,14 +12,67 @@ console.log('Loading .env file from:', envPath);
 dotenv.config({ path: envPath });
 console.log('GEMINI_API_KEY loaded:', !!process.env.GEMINI_API_KEY);
 
-function activate(context) {
-  let disposable = vscode.commands.registerCommand('playwright-doc-gemini.generateDocs', async function () {
-    const editor = vscode.window.activeTextEditor;
-    if (!editor) {
-      vscode.window.showErrorMessage('No active editor open.');
-      return;
-    }
+class PlaywrightDocumentationViewProvider {
+  constructor(context) {
+    this._context = context;
+    this._view = null;
+  }
 
+  resolveWebviewView(webviewView) {
+    this._view = webviewView;
+    webviewView.webview.options = {
+      enableScripts: true
+    };
+
+    webviewView.webview.html = this._getHtmlContent();
+
+    webviewView.webview.onDidReceiveMessage(async message => {
+      if (message.command === 'generate') {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+          vscode.window.showErrorMessage('No active editor open.');
+          return;
+        }
+        await this._generateDocumentation(editor);
+      }
+    });
+  }
+
+  _getHtmlContent() {
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { padding: 15px; }
+            button {
+              width: 100%;
+              padding: 8px;
+              background: var(--vscode-button-background);
+              color: var(--vscode-button-foreground);
+              border: none;
+              border-radius: 2px;
+              cursor: pointer;
+            }
+            button:hover {
+              background: var(--vscode-button-hoverBackground);
+            }
+          </style>
+        </head>
+        <body>
+          <button id="generateBtn">Generate Documentation</button>
+          <script>
+            const vscode = acquireVsCodeApi();
+            document.getElementById('generateBtn').addEventListener('click', () => {
+              vscode.postMessage({ command: 'generate' });
+            });
+          </script>
+        </body>
+      </html>
+    `;
+  }
+
+  async _generateDocumentation(editor) {
     const scriptContent = editor.document.getText();
     const fileName = editor.document.uri.path.split('/').pop().replace(/\.(js|ts)$/, '.md');
 
@@ -62,9 +115,23 @@ function activate(context) {
       console.error('Gemini API error:', error);
       vscode.window.showErrorMessage(`Failed to generate docs: ${error.message}`);
     }
-  });
+  }
+}
 
-  context.subscriptions.push(disposable);
+function activate(context) {
+  const provider = new PlaywrightDocumentationViewProvider(context);
+  
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider('playwrightDocGenerator', provider),
+    vscode.commands.registerCommand('playwright-doc-gemini.generateDocs', async function () {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        vscode.window.showErrorMessage('No active editor open.');
+        return;
+      }
+      await provider._generateDocumentation(editor);
+    })
+  );
 }
 
 function deactivate() {}
