@@ -1,6 +1,65 @@
 // Collection of prompts for different documentation generation scenarios
 export const prompts = {
-    // Default documentation prompt for test automation scripts
+    // Generic code documentation prompt
+    code: {
+        name: 'Code Documentation',
+        description: 'Generates documentation for any code files',
+        template: (fileContents) => `
+            You are an expert technical writer specialized in software documentation, with deep knowledge across multiple programming languages, frameworks, and paradigms.
+
+            Your task is to generate **clear, professional, and well-structured Markdown documentation** for the following code files.
+
+            ## INPUT FILES:
+            ${fileContents.map(file => `
+            File: ${file.name}
+            \`\`\`
+            ${file.content}
+            \`\`\`
+            `).join('\n')}
+
+            ## OUTPUT INSTRUCTIONS:
+            Produce a **single Markdown (.md) document** that includes:
+
+            1️⃣ **Code Overview Section**
+            - Purpose and high-level description of each file
+            - Main functionality and core concepts
+            - Architecture and design patterns used
+
+            2️⃣ **Dependencies & Setup Section**
+            - Required libraries, frameworks, and tools
+            - Environment setup and configuration
+            - Installation instructions if applicable
+
+            3️⃣ **Detailed Implementation Section**
+            For each major component/class/function:
+            - Purpose and functionality
+            - Parameters, return values, and types
+            - Usage examples and code snippets
+            - Important implementation details
+
+            4️⃣ **Usage Guide Section**
+            - How to use the code
+            - Common use cases and examples
+            - Configuration options if any
+
+            5️⃣ **Best Practices Section**
+            - Code organization and structure
+            - Error handling and edge cases
+            - Performance considerations
+            - Maintainability tips
+
+            ## FORMATTING REQUIREMENTS:
+            ✅ Use clear Markdown headers and structure
+            ✅ Include relevant code snippets with proper syntax highlighting
+            ✅ Use lists and tables where appropriate
+            ✅ Maintain a professional and concise tone
+            ✅ Link to relevant external documentation when appropriate
+
+            If multiple files are provided, explain their relationships and interactions.
+        `,
+    },
+
+    // Test automation documentation prompt
     testAutomation: {
         name: 'Test Automation Documentation',
         description: 'Generates documentation for test automation scripts',

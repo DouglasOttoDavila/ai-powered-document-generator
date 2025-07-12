@@ -13,23 +13,23 @@ console.log('Loading .env file from:', envPath);
 dotenv.config({ path: envPath });
 console.log('GEMINI_API_KEY loaded:', !!process.env.GEMINI_API_KEY);
 
-class PlaywrightDocumentationViewProvider {
+class AIDocumentationViewProvider {
   constructor(context) {
     this._context = context;
     this._view = null;
     this._files = [];
   }
 
-  async _getPlaywrightFiles() {
-    console.log('Searching for Playwright test files...');
+  async _getCodeFiles() {
+    console.log('Searching for code files...');
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
     if (!workspaceFolder) {
       console.log('No workspace folder found');
       return [];
     }
 
-    const pattern = new vscode.RelativePattern(workspaceFolder, '**/*.{spec,test}.{ts,js}');
-    const files = await vscode.workspace.findFiles(pattern);
+    const pattern = new vscode.RelativePattern(workspaceFolder, '**/*.{js,ts,py,java,cs,cpp,c,rb,go,rs,php,scala,kt,swift}');
+    const files = await vscode.workspace.findFiles(pattern, '**/node_modules/**');
     console.log(`Found ${files.length} test files`);
     return files.map(file => ({
       path: file.path,
@@ -76,7 +76,7 @@ class PlaywrightDocumentationViewProvider {
     }
     
     console.log('Updating files list...');
-    this._files = await this._getPlaywrightFiles();
+    this._files = await this._getCodeFiles();
     this._view.webview.postMessage({ 
       type: 'updateFiles', 
       files: this._files 
@@ -169,9 +169,9 @@ class PlaywrightDocumentationViewProvider {
           <div class="info-text">Select the type of documentation to generate:</div>
           <select id="taskSelect">
             <option value="">Select a documentation type...</option>
-            <option value="testAutomation">Test Automation Documentation</option>
-            <option value="api">API Documentation</option>
-            <option value="component">Component Documentation</option>
+            ${Object.entries(prompts).map(([key, prompt]) => 
+              `<option value="${key}">${prompt.name}</option>`
+            ).join('\n')}
           </select>
           <div class="info-text">Select one or more test files to generate documentation:</div>
           <div id="fileList" class="file-list"></div>
@@ -345,11 +345,11 @@ class PlaywrightDocumentationViewProvider {
 }
 
 function activate(context) {
-  console.log('Playwright Documentation Generator extension is being activated');
-  const provider = new PlaywrightDocumentationViewProvider(context);
+  console.log('AI-Powered Document Generator extension is being activated');
+  const provider = new AIDocumentationViewProvider(context);
   
   context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider('playwrightDocGenerator', provider)
+    vscode.window.registerWebviewViewProvider('aiDocGenerator', provider)
   );
   console.log('Webview provider registered successfully');
 }

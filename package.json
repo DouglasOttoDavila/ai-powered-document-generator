@@ -1,7 +1,7 @@
 {
-  "name": "playwright-document-generator",
-  "displayName": "Playwright-Document-Generator",
-  "description": "Generate Markdown documentation for Playwright test scripts using Gemini API.",
+  "name": "ai-powered-document-generator",
+  "displayName": "AI-Powered Document Generator",
+  "description": "Generate intelligent documentation for any code using Gemini API.",
   "version": "0.0.1",
   "type": "module",
   "engines": {
@@ -15,16 +15,16 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "playwright-documentation",
-          "title": "Playwright Documentation Generator",
+          "id": "ai-documentation",
+          "title": "AI Documentation Generator",
           "icon": "./media/icon.svg"
         }
       ]
     },
     "views": {
-      "playwright-documentation": [
+      "ai-documentation": [
         {
-          "id": "playwrightDocGenerator",
+          "id": "aiDocGenerator",
           "name": "Document Generator",
           "type": "webview"
         }
@@ -32,8 +32,8 @@
     },
     "commands": [
       {
-        "command": "playwright-doc-gemini.generateDocs",
-        "title": "Generate Playwright Documentation"
+        "command": "ai-doc-gemini.generateDocs",
+        "title": "Generate AI Documentation"
       }
     ]
   },

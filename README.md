@@ -1,31 +1,41 @@
-# playwright-document-generator README
+# AI-Powered Document Generator
 
-This is the README for your extension "playwright-document-generator". After writing up a brief description, we recommend including the following sections.
+A Visual Studio Code extension that uses AI (Google's Gemini) to automatically generate comprehensive documentation for your code. This extension can analyze any code files and create well-structured, professional documentation in Markdown format.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+- **Multi-Language Support**: Generate documentation for any programming language including JavaScript, TypeScript, Python, Java, C#, and more.
+- **Smart Analysis**: Uses Google's Gemini AI to understand your code's structure, purpose, and relationships.
+- **Comprehensive Documentation**: Creates detailed documentation including:
+  - Code overview and architecture
+  - Dependencies and setup requirements
+  - Detailed implementation explanations
+  - Usage guides and examples
+  - Best practices and recommendations
+- **Customizable Templates**: Different documentation templates for various types of code:
+  - General code documentation
+  - Test automation documentation
+  - API documentation
+  - Component documentation
+- **Markdown Output**: Clean, well-structured documentation in Markdown format
+- **VS Code Integration**: Easy-to-use interface integrated into VS Code's activity bar
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- Visual Studio Code v1.102.0 or higher
+- Google Gemini API key (set in `.env` file)
+- Node.js and npm installed
 
-## Extension Settings
+## Setup
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+1. Install the extension from the VS Code marketplace
+2. Create a `.env` file in your workspace root with your Gemini API key:
+   ```
+   GEMINI_API_KEY=your_api_key_here
+   ```
+3. Open the AI Documentation Generator view from the activity bar
+4. Select the files you want to document and choose a documentation type
+5. Click "Generate Documentation" to create your documentation
 
 ## Known Issues
 

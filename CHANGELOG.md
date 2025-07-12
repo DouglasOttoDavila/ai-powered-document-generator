@@ -1,9 +1,21 @@
 # Change Log
 
-All notable changes to the "playwright-document-generator" extension will be documented in this file.
+All notable changes to the "AI-Powered Document Generator" extension will be documented in this file.
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+## [1.0.0] - 2024-07-12
 
-## [Unreleased]
+### Changed
+- Rebranded from Playwright-specific to general-purpose documentation generator
+- Added support for multiple programming languages
+- Introduced new documentation templates for different code types
+- Improved file detection and analysis
+- Enhanced AI prompts for better documentation generation
 
-- Initial release
+### Added
+- General code documentation template
+- Support for additional file types
+- More comprehensive documentation structure
+- Improved README with better setup instructions
+
+## [0.0.1] - Initial Release
+- Basic Playwright test documentation functionality
