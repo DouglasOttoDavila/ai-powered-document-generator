@@ -1,0 +1,44 @@
+{
+  "name": "playwright-document-generator",
+  "displayName": "Playwright-Document-Generator",
+  "description": "Generate Markdown documentation for Playwright test scripts using Gemini API.",
+  "version": "0.0.1",
+  "type": "module",
+  "engines": {
+    "vscode": "^1.102.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "playwright-doc-gemini.generateDocs",
+        "title": "Generate Playwright Documentation"
+      }
+    ]
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.102.0",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.25.1"
+  },
+  "dependencies": {
+    "@google/genai": "^1.9.0",
+    "axios": "^1.10.0",
+    "cheerio": "^1.1.0",
+    "dotenv": "^17.2.0",
+    "html-to-text": "^9.0.5",
+    "markitdown": "^0.0.4",
+    "xlsx": "^0.18.5"
+  }
+}
