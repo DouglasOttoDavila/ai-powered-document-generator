@@ -21,13 +21,16 @@ class PlaywrightDocumentationViewProvider {
   }
 
   async _getPlaywrightFiles() {
+    console.log('Searching for Playwright test files...');
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
     if (!workspaceFolder) {
+      console.log('No workspace folder found');
       return [];
     }
 
     const pattern = new vscode.RelativePattern(workspaceFolder, '**/*.{spec,test}.{ts,js}');
     const files = await vscode.workspace.findFiles(pattern);
+    console.log(`Found ${files.length} test files`);
     return files.map(file => ({
       path: file.path,
       name: file.path.split('/').pop(),
@@ -36,6 +39,7 @@ class PlaywrightDocumentationViewProvider {
   }
 
   async resolveWebviewView(webviewView) {
+    console.log('Resolving webview view');
     this._view = webviewView;
     webviewView.webview.options = {
       enableScripts: true
@@ -48,6 +52,7 @@ class PlaywrightDocumentationViewProvider {
     
     // Handle visibility changes
     webviewView.onDidChangeVisibility(async () => {
+      console.log('Webview visibility changed:', webviewView.visible);
       if (webviewView.visible) {
         await this._updateFilesList();
       }
@@ -65,13 +70,18 @@ class PlaywrightDocumentationViewProvider {
   }
 
   async _updateFilesList() {
-    if (!this._view) return;
+    if (!this._view) {
+      console.log('No view available for file list update');
+      return;
+    }
     
+    console.log('Updating files list...');
     this._files = await this._getPlaywrightFiles();
     this._view.webview.postMessage({ 
       type: 'updateFiles', 
       files: this._files 
     });
+    console.log(`Updated files list with ${this._files.length} files`);
   }
 
   _getHtmlContent() {
@@ -218,18 +228,22 @@ class PlaywrightDocumentationViewProvider {
   }
 
   async _generateDocumentation(filePaths) {
+    console.log('Starting documentation generation for files:', filePaths);
     vscode.window.showInformationMessage('Generating documentation with Gemini...');
 
     try {
       if (!process.env.GEMINI_API_KEY) {
+        console.log('Error: GEMINI_API_KEY not found in environment variables');
         this._view.webview.postMessage({ type: 'generationError' });
         throw new Error('GEMINI_API_KEY environment variable is not set');
       }
 
       // Read all selected files
+      console.log('Reading selected files...');
       const fileContents = await Promise.all(filePaths.map(async (filePath) => {
         const uri = vscode.Uri.file(filePath);
         const document = await vscode.workspace.openTextDocument(uri);
+        console.log(`Read file: ${filePath}`);
         return {
           name: filePath.split('/').pop(),
           content: document.getText()
@@ -237,10 +251,13 @@ class PlaywrightDocumentationViewProvider {
       }));
 
       const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
+      console.log('Initialized Gemini AI client');
 
       // Get the test automation documentation prompt
       const prompt = prompts.testAutomation.template(fileContents);
+      console.log('Generated prompt for Gemini');
 
+      console.log('Sending request to Gemini API...');
       const result = await ai.models.generateContent({
         model: 'gemini-2.0-flash',
         contents: prompt,
@@ -249,21 +266,26 @@ class PlaywrightDocumentationViewProvider {
       let documentation = result.text;
 
       if (!documentation) {
+        console.log('Error: No documentation received from Gemini');
         vscode.window.showErrorMessage('No documentation received from Gemini.');
         return;
       }
+      console.log('Received documentation from Gemini');
 
       // Clean the markdown content before saving
       documentation = this._cleanMarkdownContent(documentation);
+      console.log('Cleaned markdown content');
 
       const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
       if (!workspaceFolder) {
+        console.log('Error: No workspace folder open');
         vscode.window.showErrorMessage('No workspace folder open.');
         return;
       }
 
       const docFolder = vscode.Uri.joinPath(workspaceFolder.uri, 'documentation');
       await vscode.workspace.fs.createDirectory(docFolder);
+      console.log('Created documentation directory');
 
       // Use the first file name as base for documentation file name
       const fileName = filePaths[0].split('/').pop().replace(/\.(js|ts)$/, '') + 
@@ -272,10 +294,12 @@ class PlaywrightDocumentationViewProvider {
 
       const docFile = vscode.Uri.joinPath(docFolder, fileName);
       await vscode.workspace.fs.writeFile(docFile, Buffer.from(documentation, 'utf8'));
+      console.log(`Documentation saved to: ${docFile.fsPath}`);
 
       this._view.webview.postMessage({ type: 'generationComplete' });
       vscode.window.showInformationMessage(`Documentation saved to /documentation/${fileName}`);
     } catch (error) {
+      console.error('Documentation generation failed:', error);
       this._view.webview.postMessage({ type: 'generationError' });
       console.error('Gemini API error:', error);
       vscode.window.showErrorMessage(`Failed to generate docs: ${error.message}`);
@@ -284,11 +308,13 @@ class PlaywrightDocumentationViewProvider {
 }
 
 function activate(context) {
+  console.log('Playwright Documentation Generator extension is being activated');
   const provider = new PlaywrightDocumentationViewProvider(context);
   
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider('playwrightDocGenerator', provider)
   );
+  console.log('Webview provider registered successfully');
 }
 
 function deactivate() {}
