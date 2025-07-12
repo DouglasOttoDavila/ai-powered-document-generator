@@ -209,6 +209,14 @@ class PlaywrightDocumentationViewProvider {
     `;
   }
 
+  _cleanMarkdownContent(content) {
+    // Remove ```markdown from the beginning and ``` from the end if they exist
+    return content
+      .replace(/^```markdown\n/, '')  // Remove opening ```markdown
+      .replace(/\n```$/, '')          // Remove closing ```
+      .trim();                        // Clean up any extra whitespace
+  }
+
   async _generateDocumentation(filePaths) {
     vscode.window.showInformationMessage('Generating documentation with Gemini...');
 
@@ -238,12 +246,15 @@ class PlaywrightDocumentationViewProvider {
         contents: prompt,
       });
 
-      const documentation = result.text;
+      let documentation = result.text;
 
       if (!documentation) {
         vscode.window.showErrorMessage('No documentation received from Gemini.');
         return;
       }
+
+      // Clean the markdown content before saving
+      documentation = this._cleanMarkdownContent(documentation);
 
       const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
       if (!workspaceFolder) {
