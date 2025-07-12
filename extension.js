@@ -214,9 +214,10 @@ class AIDocumentationViewProvider {
               <span class="toggle-icon">▼</span>
             </div>
             <div class="config-content" id="configContent">
-              <div class="info-text">Enter your Gemini API key:</div>
+              <div class="info-text">Enter your <a href="https://aistudio.google.com/app/apikey" title="Click here to set up your free or paid Gemini API key" target="_blank">Gemini API key</a>:</div>
               <input type="password" id="apiKeyInput" value="${apiKey}" placeholder="Enter your Gemini API key here"/>
               <button id="saveApiKey">Save API Key</button>
+              <div class="info-text" style="font-size: 10px; color: var(--vscode-descriptionForeground); margin-top: 8px;">Note: Your API key is stored securely in your local VS Code settings and is never transmitted to the extension owner or any third parties.</div>
             </div>
           </div>
 
@@ -231,6 +232,10 @@ class AIDocumentationViewProvider {
           <div id="fileList" class="file-list"></div>
           <div class="spinner" id="loadingSpinner"></div>
           <button id="generateBtn" disabled>Generate Documentation</button>
+          <div class="info-text" style="text-align: center; margin-top: 20px; font-size: 10px;">
+            Created by <a href="https://github.com/DouglasOttoDavila" title="Visit creator's GitHub profile" target="_blank">Douglas D'Avila</a>
+            <br>A QA by day, code enthusiast by... also day! 🚀✨
+          </div>
           <script>
             const vscode = acquireVsCodeApi();
             let state = vscode.getState() || { selectedFiles: [], selectedTask: '' };
