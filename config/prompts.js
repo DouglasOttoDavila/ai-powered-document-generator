@@ -3,7 +3,7 @@ export const prompts = {
     // Default documentation prompt for test automation scripts
     testAutomation: {
         name: 'Test Automation Documentation',
-        description: 'Generates documentation for Playwright test automation scripts',
+        description: 'Generates documentation for test automation scripts',
         template: (fileContents) => `
             You are an expert technical writer specialized in software documentation, particularly in **test automation frameworks** like Playwright, Cypress, Selenium, and others.
 

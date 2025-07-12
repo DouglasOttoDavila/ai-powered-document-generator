@@ -64,7 +64,7 @@ class PlaywrightDocumentationViewProvider {
           vscode.window.showErrorMessage('Please select at least one file.');
           return;
         }
-        await this._generateDocumentation(message.files);
+        await this._generateDocumentation(message.files, message.task);
       }
     });
   }
@@ -135,6 +135,18 @@ class PlaywrightDocumentationViewProvider {
               font-size: 12px;
               color: var(--vscode-descriptionForeground);
             }
+            select {
+              width: 100%;
+              padding: 8px;
+              margin-bottom: 10px;
+              background: var(--vscode-input-background);
+              color: var(--vscode-input-foreground);
+              border: 1px solid var(--vscode-input-border);
+              border-radius: 2px;
+            }
+            select:focus {
+              outline: 1px solid var(--vscode-focusBorder);
+            }
             .spinner {
               display: none;
               width: 24px;
@@ -154,24 +166,43 @@ class PlaywrightDocumentationViewProvider {
           </style>
         </head>
         <body>
+          <div class="info-text">Select the type of documentation to generate:</div>
+          <select id="taskSelect">
+            <option value="">Select a documentation type...</option>
+            <option value="testAutomation">Test Automation Documentation</option>
+            <option value="api">API Documentation</option>
+            <option value="component">Component Documentation</option>
+          </select>
           <div class="info-text">Select one or more test files to generate documentation:</div>
           <div id="fileList" class="file-list"></div>
           <div class="spinner" id="loadingSpinner"></div>
           <button id="generateBtn" disabled>Generate Documentation</button>
           <script>
             const vscode = acquireVsCodeApi();
-            let state = vscode.getState() || { selectedFiles: [] };
+            let state = vscode.getState() || { selectedFiles: [], selectedTask: '' };
             const generateBtn = document.getElementById('generateBtn');
             const loadingSpinner = document.getElementById('loadingSpinner');
+            const taskSelect = document.getElementById('taskSelect');
+            
+            // Set initial task selection from state
+            taskSelect.value = state.selectedTask;
             
             function setLoading(isLoading) {
-              generateBtn.disabled = isLoading || state.selectedFiles.length === 0;
+              const hasSelectedTask = state.selectedTask && state.selectedTask.trim() !== '';
+              const hasSelectedFiles = state.selectedFiles.length > 0;
+              generateBtn.disabled = isLoading || !hasSelectedFiles || !hasSelectedTask;
               if (isLoading) {
                 loadingSpinner.style.display = 'block';
               } else {
                 loadingSpinner.style.display = 'none';
               }
             }
+
+            // Handle task selection
+            taskSelect.addEventListener('change', (e) => {
+              state.selectedTask = e.target.value;
+              vscode.setState(state);
+            });
 
             // Handle file selection
             document.getElementById('fileList').addEventListener('change', (e) => {
@@ -189,7 +220,8 @@ class PlaywrightDocumentationViewProvider {
               setLoading(true);
               vscode.postMessage({ 
                 command: 'generate',
-                files: state.selectedFiles
+                files: state.selectedFiles,
+                task: state.selectedTask
               });
             });
 
@@ -227,8 +259,9 @@ class PlaywrightDocumentationViewProvider {
       .trim();                        // Clean up any extra whitespace
   }
 
-  async _generateDocumentation(filePaths) {
+  async _generateDocumentation(filePaths, task = 'testAutomation') {
     console.log('Starting documentation generation for files:', filePaths);
+    console.log('Using task type:', task);
     vscode.window.showInformationMessage('Generating documentation with Gemini...');
 
     try {
@@ -253,8 +286,12 @@ class PlaywrightDocumentationViewProvider {
       const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
       console.log('Initialized Gemini AI client');
 
-      // Get the test automation documentation prompt
-      const prompt = prompts.testAutomation.template(fileContents);
+      // Get the selected task's prompt template
+      const promptTemplate = prompts[task]?.template;
+      if (!promptTemplate) {
+        throw new Error(`Invalid task type: ${task}`);
+      }
+      const prompt = promptTemplate(fileContents);
       console.log('Generated prompt for Gemini');
 
       console.log('Sending request to Gemini API...');
