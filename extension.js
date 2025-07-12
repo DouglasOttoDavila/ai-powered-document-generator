@@ -125,16 +125,44 @@ class PlaywrightDocumentationViewProvider {
               font-size: 12px;
               color: var(--vscode-descriptionForeground);
             }
+            .spinner {
+              display: none;
+              width: 24px;
+              height: 24px;
+              margin: 10px auto;
+              border: 3px solid var(--vscode-button-background);
+              border-radius: 50%;
+              border-top-color: transparent;
+              animation: spin 1s linear infinite;
+            }
+            @keyframes spin {
+              to { transform: rotate(360deg); }
+            }
+            .loading .spinner {
+              display: block;
+            }
           </style>
         </head>
         <body>
           <div class="info-text">Select one or more test files to generate documentation:</div>
           <div id="fileList" class="file-list"></div>
+          <div class="spinner" id="loadingSpinner"></div>
           <button id="generateBtn" disabled>Generate Documentation</button>
           <script>
             const vscode = acquireVsCodeApi();
             let state = vscode.getState() || { selectedFiles: [] };
+            const generateBtn = document.getElementById('generateBtn');
+            const loadingSpinner = document.getElementById('loadingSpinner');
             
+            function setLoading(isLoading) {
+              generateBtn.disabled = isLoading || state.selectedFiles.length === 0;
+              if (isLoading) {
+                loadingSpinner.style.display = 'block';
+              } else {
+                loadingSpinner.style.display = 'none';
+              }
+            }
+
             // Handle file selection
             document.getElementById('fileList').addEventListener('change', (e) => {
               if (e.target.type === 'checkbox') {
@@ -142,12 +170,13 @@ class PlaywrightDocumentationViewProvider {
                 state.selectedFiles = Array.from(document.querySelectorAll('#fileList input[type="checkbox"]:checked'))
                   .map(checkbox => checkbox.getAttribute('data-path'));
                 vscode.setState(state);
-                document.getElementById('generateBtn').disabled = state.selectedFiles.length === 0;
+                setLoading(false);
               }
             });
 
             // Handle generate button click
-            document.getElementById('generateBtn').addEventListener('click', () => {
+            generateBtn.addEventListener('click', () => {
+              setLoading(true);
               vscode.postMessage({ 
                 command: 'generate',
                 files: state.selectedFiles
@@ -169,8 +198,9 @@ class PlaywrightDocumentationViewProvider {
                     '<span>' + file.name + '</span>' +
                     '</div>';
                 }).join('');
-                // Update button state
-                document.getElementById('generateBtn').disabled = state.selectedFiles.length === 0;
+                setLoading(false);
+              } else if (message.type === 'generationComplete' || message.type === 'generationError') {
+                setLoading(false);
               }
             });
           </script>
@@ -184,6 +214,7 @@ class PlaywrightDocumentationViewProvider {
 
     try {
       if (!process.env.GEMINI_API_KEY) {
+        this._view.webview.postMessage({ type: 'generationError' });
         throw new Error('GEMINI_API_KEY environment variable is not set');
       }
 
@@ -231,8 +262,10 @@ class PlaywrightDocumentationViewProvider {
       const docFile = vscode.Uri.joinPath(docFolder, fileName);
       await vscode.workspace.fs.writeFile(docFile, Buffer.from(documentation, 'utf8'));
 
+      this._view.webview.postMessage({ type: 'generationComplete' });
       vscode.window.showInformationMessage(`Documentation saved to /documentation/${fileName}`);
     } catch (error) {
+      this._view.webview.postMessage({ type: 'generationError' });
       console.error('Gemini API error:', error);
       vscode.window.showErrorMessage(`Failed to generate docs: ${error.message}`);
     }
