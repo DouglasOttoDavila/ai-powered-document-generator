@@ -3,6 +3,7 @@ import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { prompts } from './config/prompts.js';
 
 // Get the absolute path to the .env file
 const __filename = fileURLToPath(import.meta.url);
@@ -43,10 +44,13 @@ class PlaywrightDocumentationViewProvider {
     webviewView.webview.html = this._getHtmlContent();
     
     // Initial file list load
-    this._files = await this._getPlaywrightFiles();
-    webviewView.webview.postMessage({ 
-      type: 'updateFiles', 
-      files: this._files 
+    await this._updateFilesList();
+    
+    // Handle visibility changes
+    webviewView.onDidChangeVisibility(async () => {
+      if (webviewView.visible) {
+        await this._updateFilesList();
+      }
     });
 
     webviewView.webview.onDidReceiveMessage(async message => {
@@ -57,6 +61,16 @@ class PlaywrightDocumentationViewProvider {
         }
         await this._generateDocumentation(message.files);
       }
+    });
+  }
+
+  async _updateFilesList() {
+    if (!this._view) return;
+    
+    this._files = await this._getPlaywrightFiles();
+    this._view.webview.postMessage({ 
+      type: 'updateFiles', 
+      files: this._files 
     });
   }
 
@@ -119,20 +133,14 @@ class PlaywrightDocumentationViewProvider {
           <button id="generateBtn" disabled>Generate Documentation</button>
           <script>
             const vscode = acquireVsCodeApi();
-            const state = vscode.getState() || { selectedFiles: [] };
+            let state = vscode.getState() || { selectedFiles: [] };
             
             // Handle file selection
             document.getElementById('fileList').addEventListener('change', (e) => {
               if (e.target.type === 'checkbox') {
                 const filePath = e.target.getAttribute('data-path');
-                if (e.target.checked) {
-                  state.selectedFiles.push(filePath);
-                } else {
-                  const index = state.selectedFiles.indexOf(filePath);
-                  if (index > -1) {
-                    state.selectedFiles.splice(index, 1);
-                  }
-                }
+                state.selectedFiles = Array.from(document.querySelectorAll('#fileList input[type="checkbox"]:checked'))
+                  .map(checkbox => checkbox.getAttribute('data-path'));
                 vscode.setState(state);
                 document.getElementById('generateBtn').disabled = state.selectedFiles.length === 0;
               }
@@ -152,14 +160,17 @@ class PlaywrightDocumentationViewProvider {
               if (message.type === 'updateFiles') {
                 const fileList = document.getElementById('fileList');
                 fileList.innerHTML = message.files.map(file => {
+                  const isChecked = state.selectedFiles.includes(file.path);
                   return '<div class="file-item">' +
                     '<input type="checkbox" ' +
                     'data-path="' + file.path + '" ' +
-                    (file.checked ? 'checked ' : '') +
+                    (isChecked ? 'checked ' : '') +
                     '/>' +
                     '<span>' + file.name + '</span>' +
                     '</div>';
                 }).join('');
+                // Update button state
+                document.getElementById('generateBtn').disabled = state.selectedFiles.length === 0;
               }
             });
           </script>
@@ -188,22 +199,8 @@ class PlaywrightDocumentationViewProvider {
 
       const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
 
-      // Create a prompt that includes all files
-      const prompt = `Generate detailed Markdown documentation for the following Playwright test files:
-
-${fileContents.map(file => `
-File: ${file.name}
-\`\`\`typescript
-${file.content}
-\`\`\`
-`).join('\n')}
-
-Please create a comprehensive documentation that:
-1. Explains the purpose and functionality of each test file
-2. Describes how the files work together (if multiple files are selected)
-3. Details any setup, prerequisites, or configuration needed
-4. Includes examples and expected outcomes
-`;
+      // Get the test automation documentation prompt
+      const prompt = prompts.testAutomation.template(fileContents);
 
       const result = await ai.models.generateContent({
         model: 'gemini-2.0-flash',
