@@ -137,13 +137,222 @@ export const prompts = {
     api: {
         name: 'API Documentation',
         description: 'Template for generating API documentation',
-        template: () => `// To be implemented`
+        template: (fileContents) => `
+            You are an expert technical writer specialized in **API documentation**.
+
+            Your task is to analyze the provided code files and generate clear, structured **Markdown API documentation** for all API endpoints defined or referenced.  
+
+            ## INPUT FILES:
+            ${fileContents.map(file => `
+            File: ${file.name}
+            \`\`\`typescript
+            ${file.content}
+            \`\`\`
+            `).join('\n')}
+
+            ## YOUR OUTPUT:
+            Produce a **single, clean Markdown (.md) document** that includes:
+
+            1️⃣ **Overview**
+            - High-level description of the API (purpose, domain, main functionalities).
+            - Mention overall architecture (REST, GraphQL, WebSocket, etc.) if detected.
+
+            2️⃣ **Endpoint Documentation**
+            For each endpoint found:
+            - **Method & Path** (e.g., 'GET /users/{id}')
+            - **Summary**: short description of the purpose.
+            - **Request Parameters**:
+            - Path, query, header, body (describe type, required/optional, example values).
+            - **Request Body**:
+            - For POST/PUT/PATCH: schema or main fields.
+            - **Response**
+            - Status codes, body schema/structure, and example if available.
+            - **Authentication & Authorization**
+            - Indicate if token, API key, or other security is required.
+            - **Related functions/files** (e.g., controller, service, resolver names)
+
+            3️⃣ **Error Handling**
+            - List common error responses (status codes, messages, conditions).
+
+            4️⃣ **How to Use**
+            - Example cURL or HTTP request examples for each main endpoint.
+
+            5️⃣ **Additional Notes**
+            (Optional but encouraged)
+            - Deprecation notes, rate limits, known limitations.
+
+            ## FORMATTING REQUIREMENTS:
+            ✅ Use Markdown headers ('#', '##', '###')  
+            ✅ Include code examples in fenced blocks (\`\`\`) with language  
+            ✅ Use lists for endpoints and parameters
+            ✅ Use tables for parameters when useful  
+            ✅ Keep tone professional and concise  
+            ✅ Use consistent language across sections (e.g., always use “Request Body” not “Input”)
+
+            If multiple files are provided, **merge their information into a unified API documentation** showing how components work together.
+
+            ---
+
+            ### 🚀 Example (shortened)
+
+            # API Documentation: User Service
+
+            ## Overview
+            REST API for managing users, including registration, authentication, and profile management.
+
+            ## Endpoints
+              
+            ### POST /api/users/register
+            **Summary**: Register a new user.
+
+            **Request Body**
+            | Field    | Type   | Required | Description        |
+            |----------|--------|----------|--------------------|
+            | email    | string | yes      | User email        |
+            | password | string | yes      | User password    |
+
+            **Response**
+            - 201 Created: User registered
+            - 400 Bad Request: Validation error
+
+            **Example**
+            \`\`\`
+            curl -X POST /api/users/register -d '{ "email": "test@example.com", "password": "secret" }'
+            \`\`\`
+
+            ### GET /api/users/{id}
+            **Summary**: Retrieve user details by ID.
+            ...
+        `,
     },
 
     // Placeholder for component documentation prompt
     component: {
         name: 'Component Documentation',
         description: 'Template for generating component documentation',
-        template: () => `// To be implemented`
+        template: (fileContents) => `
+            You are an expert technical writer specialized in software **component documentation**.
+
+            Your task is to analyze the provided code files and generate clear, structured **Markdown documentation** for each identified component.
+
+
+            ## INPUT FILES:
+            ${fileContents.map(file => `
+            File: ${file.name}
+            \`\`\`typescript
+            ${file.content}
+            \`\`\`
+            `).join('\n')}
+
+            ## YOUR OUTPUT:
+            Produce a **single Markdown (.md) document** that includes:
+
+            ---
+
+            1️⃣ **Overview**
+            - Brief summary of what the file(s) implement and the types of components included (e.g., React components, Angular components, Vue SFCs, backend modules, etc.).
+
+            ---
+
+            2️⃣ **Component Blocks**
+            For each identified component:
+            - **Component Name**
+            - Name or identifier from the code.
+            
+            - **Description**
+            - Short summary of the component's purpose and behavior.
+            
+            - **Props / Inputs**
+            - Table listing prop/input name, type, required/optional, default value, description.
+
+            - **Events / Outputs**
+            - If applicable, list emitted events or output bindings, including description and payload.
+
+            - **Slots / Children / Content**
+            - For UI components, describe any slots or child content supported.
+
+            - **Usage Example**
+            - Provide a minimal code example (JSX, HTML, template, or usage snippet).
+
+            - **Dependencies**
+            - Mention other components, hooks, services, or modules used internally.
+
+            ---
+
+            3️⃣ **Best Practices / Notes**
+            (Optional but encouraged)
+            - Tips for usage, known limitations, performance considerations, or accessibility notes.
+
+            ---
+
+            ## FORMATTING REQUIREMENTS:
+            ✅ Use Markdown headers ('#', '##', '###')  
+            ✅ For each component, use **clearly separated sections**  
+            ✅ Use tables for props, events, etc., where applicable  
+            ✅ Provide code examples fenced with correct language blocks (e.g., \`\`\`jsx\`, \`\`\`html\`, etc.)  
+            ✅ Use professional, concise language  
+            ✅ Link related documentation if referenced in comments
+
+            ---
+
+            ## SPECIAL INSTRUCTIONS:
+            - If multiple components are found **in one file**, generate individual documentation blocks per component.
+            - If components are **spread across multiple files**, merge into a unified document, grouping by file if useful.
+
+            ---
+
+            ### 🚀 Example (shortened)
+
+            # Component Documentation: Button and ButtonGroup
+
+            ## Overview
+            This file provides a 'Button' and 'ButtonGroup' React component for building accessible, styled buttons.
+
+            ---
+
+            ## Component: Button
+
+            ### Description
+            A reusable button component with customizable variants, sizes, and click handlers.
+
+            ### Props
+            | Name     | Type     | Required | Default  | Description          |
+            |----------|----------|----------|----------|----------------------|
+            | variant  | string   | no       | 'primary' | Button style variant |
+            | disabled | boolean  | no       | false    | Disable the button   |
+            | onClick  | function | no       | -        | Click event handler  |
+
+            ### Usage Example
+            \`\`\`jsx
+            <Button variant="secondary" onClick={handleClick}>Save</Button>
+            \`\`\`
+
+            ---
+
+            ## Component: ButtonGroup
+
+            ### Description
+            Groups multiple buttons horizontally or vertically.
+
+            ### Props
+            | Name   | Type    | Required | Default | Description        |
+            |--------|---------|----------|---------|--------------------|
+            | stacked| boolean | no       | false   | Stack buttons vertically |
+
+            ### Usage Example
+            \`\`\`jsx
+            <ButtonGroup>
+            <Button>Yes</Button>
+            <Button>No</Button>
+            </ButtonGroup>
+            \`\`\`
+
+            ---
+
+            ## Best Practices
+            - Use semantic 'type' attributes for buttons ('submit', 'button', 'reset').
+            - Ensure 'aria-label' for icon-only buttons.
+
+        `,
     }
 };
