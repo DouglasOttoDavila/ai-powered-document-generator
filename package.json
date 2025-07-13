@@ -5,6 +5,10 @@
   "publisher": "DouglasDavila",
   "version": "0.0.1",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DouglasOttoDavila/ai-powered-document-generator"
+  },
   "engines": {
     "vscode": "^1.102.0"
   },
@@ -18,7 +22,7 @@
         {
           "id": "ai-documentation",
           "title": "AI-Powered Doc Generator",
-          "icon": "./media/icon.svg"
+          "icon": "./media/icon.png"
         }
       ]
     },
