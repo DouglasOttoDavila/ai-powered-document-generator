@@ -1,38 +1,93 @@
 # AI-Powered Document Generator
 
-A Visual Studio Code extension that uses AI (Google's Gemini) to automatically generate comprehensive documentation for your code. This extension can analyze any code files and create well-structured, professional documentation in Markdown format.
+A Visual Studio Code extension that uses AI (Google's Gemini) to automatically generate comprehensive documentation for your code.  
+This extension can analyze any code files and create well-structured, professional documentation in Markdown format.
 
-## Features
+---
 
-- **Multi-Language Support**: Generate documentation for any programming language including JavaScript, TypeScript, Python, Java, C#, and more.
-- **Smart Analysis**: Uses Google's Gemini AI to understand your code's structure, purpose, and relationships.
-- **Comprehensive Documentation**: Creates detailed documentation including:
+## ✨ Features
+
+- **Multi-Language Support**  
+  Generate documentation for any programming language including JavaScript, TypeScript, Python, Java, C#, and more.
+
+- **Smart Analysis**  
+  Uses Google's Gemini AI (via official `@google/genai` library) to understand your code's structure, purpose, and relationships.
+
+- **Comprehensive Documentation**  
+  Creates detailed documentation including:
   - Code overview and architecture
   - Dependencies and setup requirements
   - Detailed implementation explanations
   - Usage guides and examples
   - Best practices and recommendations
-- **Customizable Templates**: Different documentation templates for various types of code:
+
+- **Customizable Templates**  
+  Different documentation templates for various types of code:
   - General code documentation
   - Test automation documentation
   - API documentation
   - Component documentation
-- **Markdown Output**: Clean, well-structured documentation in Markdown format
-- **VS Code Integration**: Easy-to-use interface integrated into VS Code's activity bar
 
-## Requirements
+- **Markdown Output**  
+  Clean, well-structured documentation in Markdown format.
 
-- Visual Studio Code v1.102.0 or higher
-- Google Gemini API key (set in `.env` file)
-- Node.js and npm installed
+- **VS Code Integration**  
+  Easy-to-use interface integrated into the VS Code activity bar.
 
-## Setup
+---
 
-1. Install the extension from the VS Code marketplace
-2. Create a `.env` file in your workspace root with your Gemini API key:
-   ```
-   GEMINI_API_KEY=your_api_key_here
-   ```
-3. Open the AI Documentation Generator view from the activity bar
-4. Select the files you want to document and choose a documentation type
-5. Click "Generate Documentation" to create your documentation
+## ⚙️ Requirements
+
+- Visual Studio Code v1.102.0 or higher  
+- Node.js (v18+ recommended)  
+- Google Gemini API key
+
+---
+
+## 🚀 Setup
+
+1️⃣ Install the extension from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=DouglasDavila.ai-powered-document-generator) or `.vsix` package.
+
+2️⃣ Get your Gemini API key:
+- Go to [Google AI Studio](https://aistudio.google.com/app/apikey).
+- Copy your **Gemini API key**.
+
+3️⃣ Set the API key in the extension:
+- Method 1 (preferred):
+  - Open the extension tab on VS Code.
+  - Click `Configuration` on the top of the widget.
+  - Set your **Gemini API key**.
+  - Click `Save API Key` button.
+
+- Method 2:
+  - Open **VS Code Settings** → search for `AI Documentation Generator`.
+  - Paste your **Gemini API key** into the `geminiApiKey` field.
+
+
+4️⃣ Open the AI Documentation Generator view from the VS Code activity bar.
+
+5️⃣ Select:
+- Files you want to document.
+- Documentation type (from the dropdown).
+
+6️⃣ Click **Generate Documentation** and let the extension create beautiful Markdown docs.
+
+---
+
+## 🛠 Technical Notes
+
+- Uses the official [`@google/genai`](https://www.npmjs.com/package/@google/genai) package.
+- Passes the API key correctly via `{ apiKey }` object.
+- Does **not** rely on `.env` files inside the packaged extension — keys are set via VS Code settings or system env.
+
+---
+
+## 💬 Questions or Feedback?
+
+Check out the project on [GitHub](https://github.com/DouglasOttoDavila/ai-powered-document-generator)  
+or reach out to the creator, [Douglas D'Avila](https://github.com/DouglasOttoDavila).
+
+---
+
+🛡️ **Note:**  
+Your API key is stored **only** in your local VS Code settings and is never transmitted to the extension owner or third parties.
