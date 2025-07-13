@@ -2,6 +2,30 @@
 
 All notable changes to the "AI-Powered Document Generator" extension will be documented in this file.
 
+## [0.0.5] - 2024-07-13
+
+### Changed
+- Replaced extension icon with a more modern, abstract design (new logo!)
+
+---
+
+## [0.0.4] - 2024-07-13
+
+### Added
+- Added application icon alongside extension icon for better brand presence
+
+### Changed
+- Replaced initial extension icon with an improved, more polished version
+
+---
+
+## [0.0.3] - 2024-07-13
+
+### Changed
+- Updated README and documentation for clearer setup, usage instructions, and feature descriptions
+
+---
+
 ## [0.0.2] - 2024-07-13
 
 ### Fixed
