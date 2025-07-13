@@ -422,6 +422,11 @@ class AIDocumentationViewProvider {
       await vscode.workspace.fs.writeFile(docFile, Buffer.from(documentation, 'utf8'));
       console.log(`Documentation saved to: ${docFile.fsPath}`);
 
+      // Open the newly created markdown file in the editor
+      const docDocument = await vscode.workspace.openTextDocument(docFile);
+      await vscode.window.showTextDocument(docDocument, vscode.ViewColumn.One);
+      console.log(`Opened documentation file: ${docFile.fsPath}`);
+
       this._view.webview.postMessage({ type: 'generationComplete' });
       vscode.window.showInformationMessage(`Documentation saved to /documentation/${fileName}`);
     } catch (error) {
