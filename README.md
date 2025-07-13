@@ -34,6 +34,12 @@ This extension can analyze any code files and create well-structured, profession
 - **VS Code Integration**  
   Easy-to-use interface integrated into the VS Code activity bar.
 
+- **Folder Tree View**  
+  Visual file selector that mirrors the VS Code Explorer, with expandable/collapsible folders and multi-file selection.
+
+- **Customizable File Type Filtering**  
+  Easily adjust which file types are included by editing `config/validFiletypes.js` in the extension code.
+
 ---
 
 ## ⚙️ Requirements
@@ -79,6 +85,8 @@ This extension can analyze any code files and create well-structured, profession
 - Uses the official [`@google/genai`](https://www.npmjs.com/package/@google/genai) package.
 - Passes the API key correctly via `{ apiKey }` object.
 - Does **not** rely on `.env` files inside the packaged extension — keys are set via VS Code settings or system env.
+- Uses `config/validFiletypes.js` to define the list of supported file extensions.
+- Builds the folder tree dynamically, showing paths relative to the open workspace root (not full system paths).
 
 ---
 

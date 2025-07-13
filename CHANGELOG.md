@@ -2,6 +2,29 @@
 
 All notable changes to the "AI-Powered Document Generator" extension will be documented in this file.
 
+## [0.1.2] - 2025-07-13
+
+### Added
+- Added package categories 'AI' and 'Testing', from valid Marketplace categories.
+
+### Changed
+- Replaced old icon with a higher definition one.
+
+
+## [0.1.0] - 2025-07-13
+
+### Added
+- Introduced dynamic file type filtering using `config/validFiletypes.js`, allowing easy customization of supported extensions.
+- Implemented a full folder tree view in the extension panel, mirroring the VS Code Explorer experience.
+- Added multi-file selection with expandable/collapsible folders.
+
+### Changed
+- Replaced flat file list with a hierarchical file tree starting from the workspace root (instead of absolute system paths).
+- Refactored backend to use `file.fsPath` and `path.relative()` for accurate cross-platform path handling.
+
+### Fixed
+- Fixed issue where file tree incorrectly showed system-level paths (like `C:/`) instead of starting at the workspace folder.
+
 ## [0.0.5] - 2024-07-13
 
 ### Changed
