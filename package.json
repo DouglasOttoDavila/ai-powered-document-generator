@@ -3,7 +3,7 @@
   "displayName": "AI-Powered Document Generator",
   "description": "Generate intelligent documentation for any code using Gemini API.",
   "publisher": "DouglasDavila",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "repository": {
     "type": "git",
