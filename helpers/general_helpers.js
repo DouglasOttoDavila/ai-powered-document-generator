@@ -4,10 +4,7 @@ const html2text = require('html-to-text');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const xlsx = require('xlsx');
-const dotenv = require('dotenv');
 const { MarkItDown } = require('markitdown');
-
-dotenv.config();
 
 /**
  * Retrieves a list of files from a specified folder based on the provided criteria.

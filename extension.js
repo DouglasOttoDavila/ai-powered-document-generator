@@ -1,17 +1,7 @@
 import * as vscode from 'vscode';
 import { GoogleGenAI } from '@google/genai';
-import dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { readFileSync } from 'fs';
 import { prompts } from './config/prompts.js';
-
-// Get the absolute path to the .env file
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const envPath = join(__dirname, '.env');
-console.log('Loading .env file from:', envPath);
-dotenv.config({ path: envPath });
-console.log('GEMINI_API_KEY loaded:', !!process.env.GEMINI_API_KEY);
 
 class AIDocumentationViewProvider {
   constructor(context) {
@@ -372,7 +362,7 @@ class AIDocumentationViewProvider {
         };
       }));
 
-      const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
+      const ai = new GoogleGenAI({ apiKey: apiKey});
       console.log('Initialized Gemini AI client');
 
       // Get the selected task's prompt template
