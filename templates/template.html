@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <div class="config-section">
+      <div class="config-header" id="configHeader">
+        <span>⚙️ Configuration</span>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="config-content" id="configContent" style="display:none;">
+        <div class="info-text">Enter your <a href="https://aistudio.google.com/app/apikey" target="_blank">Gemini API key</a>:</div>
+        <input type="password" id="apiKeyInput" value="${apiKey}" placeholder="Enter your Gemini API key here"/>
+        <button id="saveApiKey">Save API Key</button>
+      </div>
+    </div>
+
+    <div class="info-text">Select the type of documentation to generate:</div>
+    <select id="taskSelect">
+      <option value="">Select a documentation type...</option>
+      ${taskOptions}
+    </select>
+
+    <div class="info-text">Select one or more files:</div>
+    <div id="fileList" class="file-list"></div>
+    <div class="spinner" id="loadingSpinner"></div>
+    <button id="generateBtn" disabled>Generate Documentation</button>
+
+    <div class="info-text" style="text-align:center; font-size:10px; margin-top:20px;">
+      Created by <a href="https://github.com/DouglasOttoDavila" target="_blank">Douglas D'Avila</a>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

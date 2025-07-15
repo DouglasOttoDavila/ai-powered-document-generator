@@ -5,6 +5,12 @@ import { readFileSync } from 'fs';
 import { prompts } from './config/prompts.js';
 import { validFiletypes } from './config/validFiletypes.js';
 
+// Utility function to load template files
+function loadTemplate(context, templateName) {
+  const templatePath = path.join(context.extensionPath, 'templates', templateName);
+  return readFileSync(templatePath, 'utf8');
+}
+
 class AIDocumentationViewProvider {
   constructor(context) {
     this._context = context;
@@ -71,21 +77,6 @@ class AIDocumentationViewProvider {
     });
   }
 
-  /* async _updateFilesList() {
-    if (!this._view) {
-      console.log('No view available for file list update');
-      return;
-    }
-    
-    console.log('Updating files list...');
-    this._files = await this._getCodeFiles();
-    this._view.webview.postMessage({ 
-      type: 'updateFiles', 
-      files: this._files 
-    });
-    console.log(`Updated files list with ${this._files.length} files`);
-  } */
-
   async _updateFilesList() {
     if (!this._view) {
       console.log('No view available for file list update');
@@ -119,202 +110,25 @@ class AIDocumentationViewProvider {
 
   _getHtmlContent() {
     const apiKey = this._getApiKey() || '';
-    return `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <style>
-            body {
-              padding: 15px;
-              color: var(--vscode-foreground);
-              font-family: var(--vscode-font-family);
-            }
-            .file-list {
-              margin: 10px 0;
-              max-height: 300px;
-              overflow-y: auto;
-              border: 1px solid var(--vscode-panel-border);
-              padding: 5px;
-            }
-            ul { list-style-type: none; padding-left: 1em; margin: 0; }
-            .folder { cursor: pointer; font-weight: bold; }
-            .hidden { display: none; }
-            .file-item { margin-left: 1em; }
-            button {
-              width: 100%;
-              padding: 8px;
-              background: var(--vscode-button-background);
-              color: var(--vscode-button-foreground);
-              border: none;
-              border-radius: 2px;
-              cursor: pointer;
-              margin-top: 10px;
-            }
-            button:hover { background: var(--vscode-button-hoverBackground); }
-            button:disabled { opacity: 0.5; cursor: not-allowed; }
-            .info-text {
-              margin: 10px 0;
-              font-size: 12px;
-              color: var(--vscode-descriptionForeground);
-            }
-            select {
-              width: 100%;
-              padding: 8px;
-              margin-bottom: 10px;
-              background: var(--vscode-input-background);
-              color: var(--vscode-input-foreground);
-              border: 1px solid var(--vscode-input-border);
-              border-radius: 2px;
-            }
-            select:focus { outline: 1px solid var(--vscode-focusBorder); }
-            .spinner {
-              display: none;
-              width: 24px;
-              height: 24px;
-              margin: 10px auto;
-              border: 3px solid var(--vscode-button-background);
-              border-radius: 50%;
-              border-top-color: transparent;
-              animation: spin 1s linear infinite;
-            }
-            @keyframes spin { to { transform: rotate(360deg); } }
-          </style>
-        </head>
-        <body>
-          <div class="config-section">
-            <div class="config-header" id="configHeader">
-              <span>⚙️ Configuration</span>
-              <span class="toggle-icon">▼</span>
-            </div>
-            <div class="config-content" id="configContent" style="display:none;">
-              <div class="info-text">Enter your <a href="https://aistudio.google.com/app/apikey" target="_blank">Gemini API key</a>:</div>
-              <input type="password" id="apiKeyInput" value="${apiKey}" placeholder="Enter your Gemini API key here"/>
-              <button id="saveApiKey">Save API Key</button>
-            </div>
-          </div>
+    
+    // Load template files
+    let template = loadTemplate(this._context, 'template.html');
+    const styles = loadTemplate(this._context, 'styles.css');
+    const script = loadTemplate(this._context, 'script.js');
+    
+    // Generate the task options
+    const taskOptions = Object.entries(prompts)
+      .map(([key, prompt]) => `<option value="${key}">${prompt.name}</option>`)
+      .join('');
 
-          <div class="info-text">Select the type of documentation to generate:</div>
-          <select id="taskSelect">
-            <option value="">Select a documentation type...</option>
-            ${Object.entries(prompts).map(([key, prompt]) =>
-              `<option value="${key}">${prompt.name}</option>`).join('')}
-          </select>
+    // Replace template variables
+    template = template
+      .replace('${apiKey}', apiKey)
+      .replace('${taskOptions}', taskOptions)
+      .replace('<link rel="stylesheet" href="./styles.css">', `<style>${styles}</style>`)
+      .replace('<script src="./script.js"></script>', `<script>${script}</script>`);
 
-          <div class="info-text">Select one or more files:</div>
-          <div id="fileList" class="file-list"></div>
-          <div class="spinner" id="loadingSpinner"></div>
-          <button id="generateBtn" disabled>Generate Documentation</button>
-
-          <div class="info-text" style="text-align:center; font-size:10px; margin-top:20px;">
-            Created by <a href="https://github.com/DouglasOttoDavila" target="_blank">Douglas D'Avila</a>
-          </div>
-
-          <script>
-            const vscode = acquireVsCodeApi();
-            let state = vscode.getState() || { selectedFiles: [], selectedTask: '' };
-
-            const generateBtn = document.getElementById('generateBtn');
-            const loadingSpinner = document.getElementById('loadingSpinner');
-            const taskSelect = document.getElementById('taskSelect');
-            const configHeader = document.getElementById('configHeader');
-            const configContent = document.getElementById('configContent');
-            const apiKeyInput = document.getElementById('apiKeyInput');
-            const saveApiKeyBtn = document.getElementById('saveApiKey');
-
-            configHeader.addEventListener('click', () => {
-              configContent.style.display = configContent.style.display === 'none' ? 'block' : 'none';
-            });
-
-            saveApiKeyBtn.addEventListener('click', () => {
-              const apiKey = apiKeyInput.value.trim();
-              if (!apiKey) {
-                vscode.window.showErrorMessage('API key cannot be empty');
-                return;
-              }
-              vscode.postMessage({ command: 'saveApiKey', value: apiKey });
-            });
-
-            taskSelect.value = state.selectedTask;
-            taskSelect.addEventListener('change', e => {
-              state.selectedTask = e.target.value;
-              vscode.setState(state);
-              updateGenerateButton();
-            });
-
-            function updateGenerateButton() {
-              generateBtn.disabled = !state.selectedTask || state.selectedFiles.length === 0;
-            }
-
-            function toggleFolder(element) {
-              const next = element.nextElementSibling;
-              if (next) next.classList.toggle('hidden');
-              element.textContent = element.textContent.startsWith('▶') 
-                ? element.textContent.replace('▶', '▼') 
-                : element.textContent.replace('▼', '▶');
-            }
-
-            function renderTree(node) {
-              let html = '<ul>';
-              for (const key in node) {
-                const item = node[key];
-                if (item.isFile) {
-                  const checked = state.selectedFiles.includes(item.path) ? 'checked' : '';
-                  html += \`<li class="file-item">
-                    <input type="checkbox" data-path="\${item.path}" \${checked}>
-                    \${key}
-                  </li>\`;
-                } else {
-                  html += \`<li>
-                    <span class="folder" onclick="toggleFolder(this)">▶ \${key}</span>
-                    <div class="hidden">\${renderTree(item)}</div>
-                  </li>\`;
-                }
-              }
-              html += '</ul>';
-              return html;
-            }
-
-            document.getElementById('fileList').addEventListener('change', e => {
-              if (e.target.type === 'checkbox') {
-                const filePath = e.target.getAttribute('data-path');
-                if (e.target.checked) {
-                  if (!state.selectedFiles.includes(filePath)) {
-                    state.selectedFiles.push(filePath);
-                  }
-                } else {
-                  state.selectedFiles = state.selectedFiles.filter(p => p !== filePath);
-                }
-                vscode.setState(state);
-                updateGenerateButton();
-              }
-            });
-
-            generateBtn.addEventListener('click', () => {
-              loadingSpinner.style.display = 'block';
-              vscode.postMessage({
-                command: 'generate',
-                files: state.selectedFiles,
-                task: state.selectedTask
-              });
-            });
-
-            window.addEventListener('message', event => {
-              const message = event.data;
-              if (message.type === 'updateFiles') {
-                const fileList = document.getElementById('fileList');
-                fileList.innerHTML = renderTree(message.files);
-                updateGenerateButton();
-                loadingSpinner.style.display = 'none';
-              } else if (message.type === 'generationComplete' || message.type === 'generationError') {
-                loadingSpinner.style.display = 'none';
-              } else if (message.type === 'apiKeySaved') {
-                vscode.window.showInformationMessage('Gemini API key saved successfully');
-              }
-            });
-          </script>
-        </body>
-      </html>
-    `;
+    return template;
   }
 
 

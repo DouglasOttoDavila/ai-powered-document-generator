@@ -1,0 +1,70 @@
+body {
+  padding: 15px;
+  color: var(--vscode-foreground);
+  font-family: var(--vscode-font-family);
+}
+.file-list {
+  margin: 10px 0;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--vscode-panel-border);
+  padding: 5px;
+}
+ul { list-style-type: none; padding-left: 1em; margin: 0; }
+.folder { cursor: pointer; font-weight: bold; }
+.hidden { display: none; }
+.file-item { margin-left: 1em; }
+input[type="password"] {
+  width: 100%;
+  padding: 8px;
+  background: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 2px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+input[type="password"]:focus {
+  border-color: var(--vscode-focusBorder);
+}
+
+button {
+  width: 100%;
+  padding: 8px;
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  margin-top: 10px;
+  box-sizing: border-box;
+}
+button:hover { background: var(--vscode-button-hoverBackground); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+.info-text {
+  margin: 10px 0;
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+}
+select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  background: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 2px;
+}
+select:focus { outline: 1px solid var(--vscode-focusBorder); }
+.spinner {
+  display: none;
+  width: 24px;
+  height: 24px;
+  margin: 10px auto;
+  border: 3px solid var(--vscode-button-background);
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
