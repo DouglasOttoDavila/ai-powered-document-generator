@@ -68,3 +68,30 @@ select:focus { outline: 1px solid var(--vscode-focusBorder); }
   animation: spin 1s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+.custom-prompt-container {
+  margin-top: 10px;
+  display: none;
+}
+
+.custom-prompt-container.visible {
+  display: block;
+}
+
+textarea#customPromptInput {
+  width: 100%;
+  min-height: 150px;
+  padding: 8px;
+  margin-bottom: 10px;
+  background: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 2px;
+  resize: vertical;
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--vscode-editor-font-size);
+}
+
+textarea#customPromptInput:focus {
+  border-color: var(--vscode-focusBorder);
+  outline: none;
+}

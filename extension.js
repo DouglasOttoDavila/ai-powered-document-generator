@@ -70,7 +70,7 @@ class AIDocumentationViewProvider {
           vscode.window.showErrorMessage('Please select at least one file.');
           return;
         }
-        await this._generateDocumentation(message.files, message.task);
+        await this._generateDocumentation(message.files, message.task, message.customPrompt);
       } else if (message.command === 'saveApiKey') {
         await this._saveApiKey(message.value);
       }
@@ -140,7 +140,7 @@ class AIDocumentationViewProvider {
       .trim();                        // Clean up any extra whitespace
   }
 
-  async _generateDocumentation(filePaths, task = 'testAutomation') {
+  async _generateDocumentation(filePaths, task = 'testAutomation', customPrompt = '') {
     console.log('Starting documentation generation for files:', filePaths);
     console.log('Using task type:', task);
     vscode.window.showInformationMessage('Generating documentation with Gemini...');
@@ -169,12 +169,26 @@ class AIDocumentationViewProvider {
       const ai = new GoogleGenAI({ apiKey: apiKey});
       console.log('Initialized Gemini AI client');
 
-      // Get the selected task's prompt template
-      const promptTemplate = prompts[task]?.template;
-      if (!promptTemplate) {
-        throw new Error(`Invalid task type: ${task}`);
+      let prompt;
+      if (task === 'custom' && customPrompt) {
+        // For custom prompts, append the file contents after the user's prompt
+        prompt = `${customPrompt.trim()}
+
+        ## INPUT FILES:
+            ${fileContents.map(file => `
+            File: ${file.name}
+            \`\`\`
+            ${file.content}
+            \`\`\`
+            `).join('\n')}`;
+      } else {
+        // Get the selected task's prompt template
+        const promptTemplate = prompts[task]?.template;
+        if (!promptTemplate) {
+          throw new Error(`Invalid task type: ${task}`);
+        }
+        prompt = promptTemplate(fileContents);
       }
-      const prompt = promptTemplate(fileContents);
       console.log('Generated prompt for Gemini');
 
       console.log('Sending request to Gemini API...');

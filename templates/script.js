@@ -1,5 +1,5 @@
 const vscode = acquireVsCodeApi();
-let state = vscode.getState() || { selectedFiles: [], selectedTask: '' };
+let state = vscode.getState() || { selectedFiles: [], selectedTask: '', customPrompt: '' };
 
 const generateBtn = document.getElementById('generateBtn');
 const loadingSpinner = document.getElementById('loadingSpinner');
@@ -8,6 +8,8 @@ const configHeader = document.getElementById('configHeader');
 const configContent = document.getElementById('configContent');
 const apiKeyInput = document.getElementById('apiKeyInput');
 const saveApiKeyBtn = document.getElementById('saveApiKey');
+const customPromptContainer = document.getElementById('customPromptContainer');
+const customPromptInput = document.getElementById('customPromptInput');
 
 configHeader.addEventListener('click', () => {
   configContent.style.display = configContent.style.display === 'none' ? 'block' : 'none';
@@ -25,12 +27,27 @@ saveApiKeyBtn.addEventListener('click', () => {
 taskSelect.value = state.selectedTask;
 taskSelect.addEventListener('change', e => {
   state.selectedTask = e.target.value;
+  if (state.selectedTask === 'custom') {
+    customPromptContainer.classList.add('visible');
+    // Restore any previously entered custom prompt
+    customPromptInput.value = state.customPrompt || '';
+  } else {
+    customPromptContainer.classList.remove('visible');
+  }
+  vscode.setState(state);
+  updateGenerateButton();
+});
+
+customPromptInput.addEventListener('input', e => {
+  state.customPrompt = e.target.value;
   vscode.setState(state);
   updateGenerateButton();
 });
 
 function updateGenerateButton() {
-  generateBtn.disabled = !state.selectedTask || state.selectedFiles.length === 0;
+  const hasValidTask = state.selectedTask && 
+    (state.selectedTask !== 'custom' || (state.selectedTask === 'custom' && state.customPrompt.trim()));
+  generateBtn.disabled = !hasValidTask || state.selectedFiles.length === 0;
 }
 
 function toggleFolder(element) {
@@ -82,7 +99,8 @@ generateBtn.addEventListener('click', () => {
   vscode.postMessage({
     command: 'generate',
     files: state.selectedFiles,
-    task: state.selectedTask
+    task: state.selectedTask,
+    customPrompt: state.customPrompt
   });
 });
 

@@ -20,7 +20,13 @@
     <select id="taskSelect">
       <option value="">Select a documentation type...</option>
       ${taskOptions}
+      <option value="custom">Custom Prompt</option>
     </select>
+
+    <div id="customPromptContainer" class="custom-prompt-container">
+      <div class="info-text">Enter your custom prompt:</div>
+      <textarea id="customPromptInput" placeholder="Enter your custom prompt here. The content of the selected files will be automatically appended to your prompt."></textarea>
+    </div>
 
     <div class="info-text">Select one or more files:</div>
     <div id="fileList" class="file-list"></div>
