@@ -2,6 +2,17 @@
 
 All notable changes to the "AI-Powered Document Generator" extension will be documented in this file.
 
+## [0.1.3] - 2025-07-15
+
+### Added
+- Added "Custom Prompt" option in documentation type dropdown
+- Introduced a text area for users to enter their own custom prompts
+- Custom prompts automatically include selected file contents in a structured format
+
+### Changed
+- Enhanced UI to dynamically show/hide custom prompt input based on selection
+- Improved prompt handling to support both predefined and custom prompts
+
 ## [0.1.2] - 2025-07-13
 
 ### Added

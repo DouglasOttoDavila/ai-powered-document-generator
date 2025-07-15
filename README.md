@@ -21,6 +21,12 @@ This extension can analyze any code files and create well-structured, profession
   - Usage guides and examples
   - Best practices and recommendations
 
+- **Customizable Documentation**  
+  Multiple ways to generate documentation:
+  - Predefined templates for common scenarios (general code, tests, APIs, components)
+  - Custom prompts for tailored documentation needs
+  - Automatic file content inclusion in generated documentation
+
 - **Customizable Templates**  
   Different documentation templates for various types of code:
   - General code documentation
@@ -77,6 +83,37 @@ This extension can analyze any code files and create well-structured, profession
 - Documentation type (from the dropdown).
 
 6️⃣ Click **Generate Documentation** and let the extension create beautiful Markdown docs.
+
+---
+
+## 🔨 Usage
+
+1. Open your project in VS Code
+2. Click the AI Document Generator icon in the Activity Bar
+3. Select files you want to document using the folder tree
+4. Choose a documentation type:
+   - Use predefined templates for common scenarios
+   - Select "Custom Prompt" to write your own prompt
+   - Custom prompts will automatically include the content of selected files
+5. Click "Generate Documentation"
+
+### Using Custom Prompts
+
+When selecting "Custom Prompt" from the documentation type dropdown, you can:
+1. Enter any prompt you want the AI to follow
+2. Your prompt will be automatically combined with the content of selected files
+3. Use natural language to describe exactly what kind of documentation you need
+4. The extension will maintain proper formatting and structure
+
+Example custom prompt:
+```markdown
+Generate a technical specification document that includes:
+1. System Overview
+2. Architecture Details
+3. Implementation Guidelines
+4. Security Considerations
+5. Performance Requirements
+```
 
 ---
 
